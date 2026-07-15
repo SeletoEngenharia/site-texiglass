@@ -6,6 +6,14 @@
 <title>Conversor de Pisos Industriais — Taxiglass · Seleto Engenharia</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800;900&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<!-- Clerk (login) -->
+<script
+  async
+  crossorigin="anonymous"
+  data-clerk-publishable-key="pk_test_d2VhbHRoeS1nbnUtMC5jbGVyay5hY2NvdW50cy5kZXYk"
+  src="https://wealthy-gnu-0.clerk.accounts.dev/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"
+  type="text/javascript"
+></script>
 <style>
   :root{
     --navy:#002642; --navy2:#013a63; --navy3:#0a4a75;
@@ -230,6 +238,18 @@
 </style>
 </head>
 <body>
+
+<!-- ===== Portão de login (Clerk) ===== -->
+<div id="clerk-loading" style="min-height:100vh; display:flex; align-items:center; justify-content:center; font-family:'Poppins',sans-serif; color:#002642;">
+  Carregando…
+</div>
+<div id="clerk-signin-box" style="display:none; min-height:100vh; align-items:center; justify-content:center; flex-direction:column; gap:16px; font-family:'Poppins',sans-serif;">
+  <h2 style="color:#002642;">Conversor de Pisos — Acesso restrito</h2>
+  <div id="clerk-signin"></div>
+</div>
+
+<!-- ===== Conteúdo real do site (só aparece após login) ===== -->
+<div id="app-content" style="display:none;">
 
 <!-- ===================== HEADER ===================== -->
 <header>
@@ -496,6 +516,8 @@
   Ferramenta de apoio à decisão — os resultados devem ser validados por profissional habilitado.
 </footer>
 
+</div><!-- /app-content -->
+
 <script>
 /* ===================== Config ===================== */
 /* As fórmulas de cálculo NÃO ficam mais aqui — elas rodam no backend (Cloudflare Worker) */
@@ -647,7 +669,25 @@ function showTab(name){
 document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>showTab(t.dataset.tab)));
 document.querySelectorAll('[data-goto]').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.goto)));
 document.querySelectorAll('#page-tool input,#page-tool select').forEach(el=>el.addEventListener('input',recalc));
-recalc();
+
+/* ===================== Portão de login (Clerk) ===================== */
+window.addEventListener('load', async function () {
+  await window.Clerk.load();
+
+  if (window.Clerk.user) {
+    // Usuário já logado — libera o site
+    document.getElementById('clerk-loading').style.display = 'none';
+    document.getElementById('clerk-signin-box').style.display = 'none';
+    document.getElementById('app-content').style.display = 'block';
+    recalc();
+  } else {
+    // Usuário não logado — mostra a tela de login
+    document.getElementById('clerk-loading').style.display = 'none';
+    document.getElementById('clerk-signin-box').style.display = 'flex';
+    window.Clerk.mountSignIn(document.getElementById('clerk-signin'));
+  }
+});
+
 </script>
 </body>
 </html>
