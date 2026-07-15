@@ -672,6 +672,10 @@ document.querySelectorAll('#page-tool input,#page-tool select').forEach(el=>el.a
 
 /* ===================== Portão de login (Clerk) ===================== */
 window.addEventListener('load', async function () {
+  // Limpa qualquer resquício de rota antiga (ex: #/factor-two) antes de iniciar o Clerk
+  if (window.location.hash) {
+    history.replaceState(null, '', window.location.pathname + window.location.search);
+  }
   await window.Clerk.load();
 
   if (window.Clerk.user) {
