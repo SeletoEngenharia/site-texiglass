@@ -685,10 +685,9 @@ window.addEventListener('load', async function () {
     document.getElementById('app-content').style.display = 'block';
     recalc();
   } else {
-    // Usuário não logado — mostra a tela de login
-    document.getElementById('clerk-loading').style.display = 'none';
-    document.getElementById('clerk-signin-box').style.display = 'flex';
-    window.Clerk.mountSignIn(document.getElementById('clerk-signin'), { routing: 'virtual' });
+    // Usuário não logado — manda direto pra página de login do Clerk,
+    // que depois traz de volta pra cá automaticamente
+    window.Clerk.redirectToSignIn({ redirectUrl: window.location.href });
   }
 });
 
