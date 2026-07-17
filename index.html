@@ -686,16 +686,32 @@ window.addEventListener('load', async function () {
     return;
   }
 
-  if (window.Clerk.user) {
-    // Usuário já logado — libera o site
+  function liberarSite() {
     document.getElementById('clerk-loading').style.display = 'none';
     document.getElementById('clerk-signin-box').style.display = 'none';
     document.getElementById('app-content').style.display = 'block';
     recalc();
+  }
+
+  if (window.Clerk.user) {
+    // Usuário já logado — libera o site
+    liberarSite();
   } else {
-    // Usuário não logado — manda direto pra página de login do Clerk (Account Portal),
-    // que depois de autenticar redireciona automaticamente para esta mesma URL
-    window.Clerk.redirectToSignIn({ redirectUrl: window.location.href });
+    // Usuário não logado — mostra o formulário de login DENTRO da própria página
+    document.getElementById('clerk-loading').style.display = 'none';
+    document.getElementById('clerk-signin-box').style.display = 'flex';
+
+    window.Clerk.mountSignIn(document.getElementById('clerk-signin'), {
+      afterSignInUrl: window.location.pathname,
+      afterSignUpUrl: window.location.pathname,
+    });
+
+    // Assim que o login for concluído com sucesso, libera o site sem precisar recarregar a página
+    window.Clerk.addListener(({ user }) => {
+      if (user) {
+        liberarSite();
+      }
+    });
   }
 });
 
